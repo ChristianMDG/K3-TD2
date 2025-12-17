@@ -16,6 +16,14 @@ private Team team;
         this.position = positionEnum;
         this.team = team;
     }
+    public Player(int id, String name, int age, PlayerPositionEnum positionEnum) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.position = positionEnum;
+
+    }
+
 
     public int getId() {
         return id;
@@ -57,6 +65,8 @@ private Team team;
         this.team = team;
     }
 
+
+
     @Override
     public String toString() {
         return "Player{" +
@@ -64,7 +74,7 @@ private Team team;
                 ", name='" + name + '\'' +
                 ", age=" + age +
                 ", position=" + position +
-                ", team=" + team +
+                ",team=" + (team != null ? team.getName() : "No team")+
                 '}';
     }
 }

@@ -15,7 +15,6 @@ public final class DBConnection {
         if (JDBC_URL == null || USERNAME == null || PASSWORD == null) {
             throw new RuntimeException();
         }
-        System.out.println("Connecting to database...");
         System.out.println("Connected");
         return DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD);
     }

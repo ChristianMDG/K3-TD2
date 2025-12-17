@@ -9,5 +9,6 @@ public class Main {
 
         DataRetriever dataRetriever = new DataRetriever();
         System.out.println(dataRetriever.findTeamById(1));
+        System.out.println(dataRetriever.findPlayers(1,2));
     }
 }
