@@ -1,5 +1,5 @@
 package org.example;
 
-public enum Continent {
+public enum ContinentEnum {
     AFRICA,EUROPA,ASIA,AMERICA
 }

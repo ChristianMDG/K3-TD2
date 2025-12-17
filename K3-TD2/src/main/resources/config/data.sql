@@ -1,13 +1,13 @@
-insert into Team (name,continent) values
-('Real Madrid CF','EUROPA'),
-('FC BARCELONA','EUROPA'),
-('Atlético de madrid', 'EUROPA'),
-('Al Ahly SC','AFRICA'),
-('Inter Miami CF','AMERICA');
+insert into Team (id,name,continent) values
+(1,'Real Madrid CF','EUROPA'),
+(2,'FC BARCELONA','EUROPA'),
+(3,'Atlético de madrid', 'EUROPA'),
+(4,'Al Ahly SC','AFRICA'),
+(5,'Inter Miami CF','AMERICA');
 
-insert into Player(name,age,position,id_team) values
-('Thibaut Courtois',32,'GK',1),
-('Dani Carvajal',32,'DEF',1),
-('Jude Bellingham',21,'MIDF',1),
-('Robert Lewandowski',36,'STR',2),
-('Antoine Griezmann',33,'STR',3);
+insert into Player(id,name,age,position,id_team) values
+(1,'Thibaut Courtois',32,'GK',1),
+(2,'Dani Carvajal',32,'DEF',1),
+(3,'Jude Bellingham',21,'MIDF',1),
+(4,'Robert Lewandowski',36,'STR',2),
+(5,'Antoine Griezmann',33,'STR',3);

@@ -1,5 +1,5 @@
 package org.example;
 
-public enum Position {
+public enum PlayerPositionEnum {
     GK,DEF,MIDF,STR
 }
