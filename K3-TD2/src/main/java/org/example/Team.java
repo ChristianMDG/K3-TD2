@@ -8,7 +8,8 @@ public class Team {
     private String name;
     private ContinentEnum continent;
     private List<Player> players;
-    public Team() {}
+
+    public Team(){}
     public Team(int id, String name, ContinentEnum continentEnum, List<Player> players) {
         this.id = id;
         this.name = name;

@@ -7,21 +7,14 @@ private int age;
 private PlayerPositionEnum position;
 private Team team;
 
-    public Player() {}
 
+public  Player() {}
     public Player(int id, String name, int age, PlayerPositionEnum positionEnum, Team team) {
         this.id = id;
         this.name = name;
         this.age = age;
         this.position = positionEnum;
         this.team = team;
-    }
-    public Player(int id, String name, int age, PlayerPositionEnum positionEnum) {
-        this.id = id;
-        this.name = name;
-        this.age = age;
-        this.position = positionEnum;
-
     }
 
 

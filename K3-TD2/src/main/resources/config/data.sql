@@ -11,3 +11,4 @@ insert into Player(id,name,age,position,id_team) values
 (3,'Jude Bellingham',21,'MIDF',1),
 (4,'Robert Lewandowski',36,'STR',2),
 (5,'Antoine Griezmann',33,'STR',3);
+
