@@ -27,14 +27,12 @@ public class Main {
 //        System.out.println(dataRetriever.findPlayersByCriteria("ud",PlayerPositionEnum.MIDF,"Madrid",ContinentEnum.EUROPA,1,10));
 
         System.out.println("\nTest g:");
-        try {
+
             List<Player> testPlayers = new ArrayList<>();
             testPlayers.add(new Player(6, "Jude Bellingham", 23, PlayerPositionEnum.STR, null));
             testPlayers.add(new Player(7, "Pedri", 24, PlayerPositionEnum.MIDF, null));
             System.out.println(dataRetriever.createPlayers(testPlayers));
-        } catch (RuntimeException e) {
-            System.out.println("Exception: " + e.getMessage());
-        }
+
 
         System.out.println("\nTest h:");
             List<Player> newPlayers = new ArrayList<>();
