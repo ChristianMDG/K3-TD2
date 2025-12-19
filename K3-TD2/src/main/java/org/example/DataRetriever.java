@@ -116,7 +116,7 @@ select player.id as player_id, player.name as player_name, player.age as age, pl
     public List<Player> createPlayers(List<Player> newPlayers) {
 
         String checkSql = "SELECT id FROM player WHERE id = ?";
-
+        String insertSql = "INSERT INTO player (id, name, age, position, id_team) VALUES (?, ?, ?, ?::enum_position, ?)";
         if (newPlayers == null || newPlayers.isEmpty()) {
             return new ArrayList<>();
         }
@@ -130,10 +130,28 @@ select player.id as player_id, player.name as player_name, player.age as age, pl
                 }
             }
 
+            try (PreparedStatement insertStmt = connection.prepareStatement(insertSql)) {
+                for (Player player : newPlayers) {
+                    insertStmt.setInt(1, player.getId());
+                    insertStmt.setString(2, player.getName());
+                    insertStmt.setInt(3, player.getAge());
+                    insertStmt.setString(4, player.getPosition().name());
+                    if (player.getTeam() != null) {
+                        insertStmt.setInt(5, player.getTeam().getId());
+                    } else {
+                        insertStmt.setNull(5, Types.INTEGER);
+                    }
+
+                    insertStmt.executeUpdate();
+                }
+            }
+
+            connection.commit();
+            return new ArrayList<>(newPlayers);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return newPlayers;
+
     }
         public Team saveTeam(Team teamToSave) throws SQLException {
         throw new RuntimeException("Not yet implemented");
