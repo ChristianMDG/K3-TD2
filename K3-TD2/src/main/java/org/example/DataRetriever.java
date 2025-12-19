@@ -70,8 +70,6 @@ select player.id as player_id, player.name as player_name, player.age as age, pl
                         player.setName(rs.getString("player_name"));
                         player.setAge(rs.getInt("age"));
                         player.setPosition(PlayerPositionEnum.valueOf(rs.getString("position")));
-                        team.setName(rs.getString("team"));
-                        player.setTeam(team);
                         players.add(player);
                     }
                 }
