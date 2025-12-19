@@ -46,9 +46,8 @@ public class DataRetriever {
         return team;
     }
 
-    List<Player> findPlayers(int page, int size) throws SQLException {
+    public List<Player> findPlayers(int page, int size) throws SQLException {
         List<Player> players = new ArrayList<>();
-        Team team = new Team();
         int offset = (page - 1) * size;
         String findPlayerQuery = """
 select player.id as player_id, player.name as player_name, player.age as age, player.position as position, team.name as team from player
@@ -77,10 +76,9 @@ select player.id as player_id, player.name as player_name, player.age as age, pl
     }
 
 
-    List<Team> findTeamsByPlayerName(String playerName)  throws SQLException {
+    public List<Team> findTeamsByPlayerName(String playerName)  throws SQLException {
 
         List<Team> teams = new ArrayList<>();
-        Player player = new Player();
         StringBuilder findTeamsByPlayerNameQuery = new StringBuilder("""
                select team.id as team_id, team.name as team_name, team.continent as continent ,player.name as player_name from  team
                left join player on player.id_team = team.id
@@ -113,8 +111,8 @@ select player.id as player_id, player.name as player_name, player.age as age, pl
     }
     public List<Player> createPlayers(List<Player> newPlayers) {
 
-        String checkSql = "SELECT id FROM player WHERE id = ?";
-        String insertSql = "INSERT INTO player (id, name, age, position, id_team) VALUES (?, ?, ?, ?::enum_position, ?)";
+        String checkSql = "select id from player where id = ?";
+        String insertSql = "insert into player (id, name, age, position, id_team) values (?, ?, ?, ?::enum_position, ?)";
 
         if (newPlayers == null || newPlayers.isEmpty()) {
             return new ArrayList<>();
@@ -168,17 +166,15 @@ select player.id as player_id, player.name as player_name, player.age as age, pl
     public Team saveTeam(Team teamToSave) throws SQLException {
         throw new RuntimeException("Not yet implemented");
     }
-    List<Player> findPlayersByCriteria(String playerName, PlayerPositionEnum position, String teamName,
-                                       ContinentEnum continent, int page, int size
+    public List<Player> findPlayersByCriteria(String playerName, PlayerPositionEnum position, String teamName,
+                                              ContinentEnum continent, int page, int size
     ) throws SQLException {
-        Team team = new Team();
-
         List<Player> players = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
-                SELECT player.id AS player_id, player.name AS player_name, player.age AS age, player.position AS position,\s
-                team.name AS team FROM  player LEFT JOIN team ON player.id_team = team.id
+                select player.id as player_id, player.name as player_name, player.age as age, player.position as position,
+                team.name as team from  player left join team on player.id_team = team.id
                 where 1 = 1
-               \s""");
+               """);
 
         List<Object> parameters = new ArrayList<>();
 
@@ -187,16 +183,16 @@ select player.id as player_id, player.name as player_name, player.age as age, pl
             parameters.add("%" + playerName + "%");
         }
         if (position != null) {
-            sql.append("and player.position = ? ");
-            parameters.add(position);
+            sql.append("and player.position = ?::enum_position ");
+            parameters.add(position.name());
         }
         if (teamName != null) {
             sql.append("and team.name = ? ");
             parameters.add(teamName);
         }
         if (continent != null) {
-            sql.append("and player.position = ? ");
-            parameters.add(continent);
+            sql.append("and team.continent = ?::enum_continent ");
+            parameters.add(continent.name());
         }
         sql.append("limit ? offset ?");
 
@@ -218,8 +214,6 @@ select player.id as player_id, player.name as player_name, player.age as age, pl
                     player.setName(rs.getString("player_name"));
                     player.setAge(rs.getInt("age"));
                     player.setPosition(PlayerPositionEnum.valueOf(rs.getString("position")));
-                    team.setName(rs.getString("team"));
-                    player.setTeam(team);
                     players.add(player);
                 }
             }
