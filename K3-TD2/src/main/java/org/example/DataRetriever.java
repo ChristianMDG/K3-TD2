@@ -81,116 +81,6 @@ select player.id as player_id, player.name as player_name, player.age as age, pl
         return players;
     }
 
-    public List<Player> createPlayers(List<Player> newPlayers) {
-        List<Player> addedPlayers = new ArrayList<>();
-        String checkQuery = "SELECT COUNT(*) FROM Player WHERE id = ?";
-        String insertQuery = "INSERT INTO Player(id, name, age, position, id_team) VALUES (?, ?, ?, ?, ?)";
-
-        try (Connection connection = dbConnection.getDBConnection()) {
-            connection.setAutoCommit(false);
-
-            try (PreparedStatement checkStmt = connection.prepareStatement(checkQuery);
-                 PreparedStatement insertStmt = connection.prepareStatement(insertQuery)) {
-
-                for (Player player : newPlayers) {
-
-                    checkStmt.setInt(1, player.getId());
-                    ResultSet rs = checkStmt.executeQuery();
-                    if (rs.next() && rs.getInt(1) > 0) {
-                        throw new RuntimeException("Le joueur avec l'id " + player.getId() + " existe déjà !");
-                    }
-
-
-                    insertStmt.setInt(1, player.getId());
-                    insertStmt.setString(2, player.getName());
-                    insertStmt.setInt(3, player.getAge());
-                    insertStmt.setString(4, player.getPosition().name());
-                    insertStmt.setInt(5, player.getTeam().getId());
-
-                    insertStmt.executeUpdate();
-                    addedPlayers.add(player);
-                }
-
-                connection.commit();
-            } catch (Exception e) {
-                connection.rollback();
-                addedPlayers.clear();
-                throw new RuntimeException("Transaction annulée : " + e.getMessage(), e);
-            } finally {
-                connection.setAutoCommit(true);
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erreur lors de la création des joueurs : " + e.getMessage(), e);
-        }
-
-        return addedPlayers;
-    }
-
-    public Team saveTeam(Team teamToSave) {
-        String checkTeamQuery = "SELECT COUNT(*) FROM Team WHERE id = ?";
-        String insertTeamQuery = "INSERT INTO Team(id, name, continent) VALUES (?, ?, ?)";
-        String updateTeamQuery = "UPDATE Team SET name = ?, continent = ? WHERE id = ?";
-        String dissociatePlayersQuery = "UPDATE Player SET id_team = NULL WHERE id_team = ?";
-        String associatePlayerQuery = "UPDATE Player SET id_team = ? WHERE id = ?";
-
-        try (Connection connection = dbConnection.getDBConnection()) {
-            connection.setAutoCommit(false);
-
-            try (PreparedStatement checkStmt = connection.prepareStatement(checkTeamQuery);
-                 PreparedStatement insertStmt = connection.prepareStatement(insertTeamQuery);
-                 PreparedStatement updateStmt = connection.prepareStatement(updateTeamQuery);
-                 PreparedStatement dissocStmt = connection.prepareStatement(dissociatePlayersQuery);
-                 PreparedStatement assocStmt = connection.prepareStatement(associatePlayerQuery)) {
-
-
-                checkStmt.setInt(1, teamToSave.getId());
-                ResultSet rs = checkStmt.executeQuery();
-                boolean teamExists = false;
-                if (rs.next()) {
-                    teamExists = rs.getInt(1) > 0;
-                }
-
-
-                if (teamExists) {
-                    updateStmt.setString(1, teamToSave.getName());
-                    updateStmt.setString(2, teamToSave.getContinent().name());
-                    updateStmt.setInt(3, teamToSave.getId());
-                    updateStmt.executeUpdate();
-                } else {
-                    insertStmt.setInt(1, teamToSave.getId());
-                    insertStmt.setString(2, teamToSave.getName());
-                    insertStmt.setString(3, teamToSave.getContinent().name());
-                    insertStmt.executeUpdate();
-                }
-
-
-                dissocStmt.setInt(1, teamToSave.getId());
-                dissocStmt.executeUpdate();
-
-
-                if (teamToSave.getPlayers() != null) {
-                    for (Player player : teamToSave.getPlayers()) {
-                        assocStmt.setInt(1, teamToSave.getId());
-                        assocStmt.setInt(2, player.getId());
-                        assocStmt.executeUpdate();
-                    }
-                }
-
-                connection.commit();
-            } catch (Exception e) {
-                connection.rollback();
-                throw new RuntimeException("Transaction annulée : " + e.getMessage(), e);
-            } finally {
-                connection.setAutoCommit(true);
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erreur lors de la sauvegarde de l'équipe : " + e.getMessage(), e);
-        }
-
-        return teamToSave;
-    }
 
     List<Team> findTeamsByPlayerName(String playerName)  throws SQLException {
 
@@ -226,7 +116,13 @@ select player.id as player_id, player.name as player_name, player.age as age, pl
        }
        return teams;
     }
+    public List<Player> createPlayers(List<Player> newPlayers) {
+        throw new RuntimeException("Not yet implemented");
+    }
 
+    public Team saveTeam(Team teamToSave) throws SQLException {
+        throw new RuntimeException("Not yet implemented");
+    }
     public List<Player> findPlayersByCriteria(
             String playerName,
             PlayerPositionEnum position,
@@ -234,76 +130,9 @@ select player.id as player_id, player.name as player_name, player.age as age, pl
             ContinentEnum continent,
             int page,
             int size
-    ) {
-        List<Player> players = new ArrayList<>();
-        StringBuilder query = new StringBuilder(
-                "SELECT p.id, p.name, p.age, p.position, t.id as team_id, t.name as team_name, t.continent " +
-                        "FROM Player p " +
-                        "LEFT JOIN Team t ON p.id_team = t.id " +
-                        "WHERE 1=1 "
-        );
-
-        List<Object> parameters = new ArrayList<>();
-
-        if (playerName != null && !playerName.isEmpty()) {
-            query.append(" AND p.name ILIKE ? ");
-            parameters.add("%" + playerName + "%");
-        }
-
-        if (position != null) {
-            query.append(" AND p.position = ? ");
-            parameters.add(position.name());
-        }
-
-        if (teamName != null && !teamName.isEmpty()) {
-            query.append(" AND t.name ILIKE ? ");
-            parameters.add("%" + teamName + "%");
-        }
-
-        if (continent != null) {
-            query.append(" AND t.continent = ? ");
-            parameters.add(continent.name());
-        }
-
-        query.append(" ORDER BY p.id ");
-        query.append(" LIMIT ? OFFSET ? ");
-        parameters.add(size);
-        parameters.add(page * size);
-
-        try (Connection connection = dbConnection.getDBConnection();
-             PreparedStatement stmt = connection.prepareStatement(query.toString())) {
-
-            for (int i = 0; i < parameters.size(); i++) {
-                stmt.setObject(i + 1, parameters.get(i));
-            }
-
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Player player = new Player();
-                player.setId(rs.getInt("id"));
-                player.setName(rs.getString("name"));
-                player.setAge(rs.getInt("age"));
-                player.setPosition(PlayerPositionEnum.valueOf(rs.getString("position")));
-
-                Team team = new Team();
-                team.setId(rs.getInt("team_id"));
-                team.setName(rs.getString("team_name"));
-                String continentStr = rs.getString("continent");
-                if (continentStr != null) {
-                    team.setContinent(ContinentEnum.valueOf(continentStr));
-                }
-                player.setTeam(team);
-
-                players.add(player);
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erreur lors de la récupération des joueurs : " + e.getMessage(), e);
-        }
-
-        return players;
+    ) throws SQLException {
+        throw new RuntimeException("Not yet implemented");
     }
-
 
 
 }
